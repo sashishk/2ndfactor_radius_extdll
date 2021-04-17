@@ -1,0 +1,10 @@
+; SecureIASExt.def : Declares the module parameters for the DLL.
+
+LIBRARY      "SecureIASExt.dll"
+
+EXPORTS
+    ; Explicit exports can go here
+		RadiusExtensionInit             @1
+        RadiusExtensionProcessEx        @2
+        RadiusExtensionFreeAttributes   @3
+        RadiusExtensionTerm             @4

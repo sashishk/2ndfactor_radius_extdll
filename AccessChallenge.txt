@@ -1,0 +1,154 @@
+RadiusProcessExtension2 : http://www.eggheadcafe.com/forumarchives/win32programmernetworks/Nov2005/post25119705.asp
+http://www.mofeel.net/139-microsoft-public-internet-radius/1072.aspx
+
+This is what I have based on the WPS Deployment documentation on the structure of the EAP packets:
+
+#define EAP_TLV_RESULT_TLV 3 /* Acknowledged Result */
+#define EAP_TLV_NAK_TLV 4
+#define EAP_TLV_CRYPTO_BINDING_TLV 5
+#define EAP_TLV_CONNECTION_BINDING_TLV 6
+#define EAP_TLV_VENDOR_SPECIFIC_TLV 7
+#define EAP_TLV_URI_TLV 8
+#define EAP_TLV_EAP_PAYLOAD_TLV 9
+#define EAP_TLV_INTERMEDIATE_RESULT_TLV 10
+#define EAP_TLV_PAC_TLV 11 /* draft-cam-winget-eap-fast-01.txt */
+#define EAP_TLV_CRYPTO_BINDING_TLV_ 12 /* draft-cam-winget-eap-fast-01.txt*/
+
+#define EAP_TLV_RESULT_SUCCESS 1
+#define EAP_TLV_RESULT_FAILURE 2
+
+#define EAP_TLV_TYPE_MANDATORY 0x80
+#define EAP_TLV_TYPE_ACK_RESULT 0x03
+
+
+typedef struct eap_tlv_uri_packet 
+{
+	UCHAR TLVType; /* Bit 1: Mandatory Requirement */
+	/* Bit 2: TLVReserved */
+	/* Bit 3-16: TLVType */
+	UCHAR TLVValueLength;
+	UCHAR TLVValue;
+} EAPTLVURIPACKET;
+
+typedef struct eap_tlv_result_packet 
+{
+	UCHAR TLVPacketType; /* Bit 1: Mandatory Requirement */
+	/* Bit 2: TLVReserved */
+	/* Bit 3-16: TLVPacketType */
+	USHORT TLVStatusLength;
+	USHORT TLVStatus;
+} EAPTLVRESULTPACKET;
+
+
+In my actual code block that adds the EAP-TLV URI, I have this:
+
+ucTLVValueLength = (UCHAR) strlen(url);
+cbDataLength = sizeof(EAPTLVURIPACKET) + (sizeof(UCHAR) * ucTLVValueLength) + 1;
+sprintf(mesg, "About to malloc %d bytes for EAPTLV Packet.\n",
+cbDataLength);
+Debug(mesg);
+bzero(mesg, 255);
+euEAPTLV = RadiusAlloc(cbDataLength);
+sprintf(mesg, "Finished malloc.\n");
+Debug(mesg);
+bzero(mesg, 255);
+euEAPTLV->TLVType = EAP_TLV_URI_TLV;
+euEAPTLV->TLVValueLength = ucTLVValueLength;
+sprintf(mesg, "About to copy %d bytes data into TLVValue location at %X.\n", strlen(url), &euEAPTLV->TLVValue);
+Debug(mesg);
+bzero(mesg, 255);
+strcpy(&euEAPTLV->TLVValue, url);
+sprintf(mesg, "Done copying.\n");
+Debug(mesg);
+bzero(mesg, 255);
+cbDataLength = strlen((const char*)euEAPTLV);
+sprintf(mesg, "Length of EAP TLV Packet: %d.\n", cbDataLength);
+Debug(mesg);
+bzero(mesg, 255);
+
+/* Fill in the RADIUS_ATTRIBUTE struct. */
+/*cbDataLength = strlen(url);*/
+raEAPTLV.dwAttrType = ratEAPTLV;
+raEAPTLV.fDataType = rdtUnknown;
+raEAPTLV.cbDataLength = cbDataLength;
+raEAPTLV.lpValue = (PCSTR) euEAPTLV;
+
+/* Add as the ratPEAPTLV URI TLV. */
+sprintf(mesg, "Replacing first attribute of ratEAPTLV.\n");
+Debug(mesg);
+bzero(mesg, 255);
+dwResult = RadiusReplaceFirstAttribute(pInRespAttrs, &raEAPTLV);
+
+Then, in RadiusReplaceFirstAttribute:
+
+DWORD WINAPI RadiusReplaceFirstAttribute(PRADIUS_ATTRIBUTE_ARRAY pAttrs, const RADIUS_ATTRIBUTE* pSrc )
+{
+	DWORD dwIndex, dwResult;
+	char mesg[255];
+	bzero(mesg, 255);
+
+	if ((pAttrs == NULL) || (pSrc == NULL))
+	{
+	return ERROR_INVALID_PARAMETER;
+	}
+
+	dwIndex = RadiusFindFirstIndex(pAttrs, pSrc->dwAttrType);
+
+	if (dwIndex != RADIUS_ATTR_NOT_FOUND)
+	{
+	sprintf(mesg, "Attribute found at index %d.\n", dwIndex);
+	Debug(mesg);
+	bzero(mesg, 255);
+	/* It already exists, so overwrite the existing attribute. */
+	dwResult = pAttrs->SetAt(pAttrs, dwIndex, pSrc);
+	} else {
+	sprintf(mesg, "Attribute not found (%d). Adding one (pAttrs := %X; pSrc :=
+	%X).\n", dwIndex, pAttrs, pSrc);
+	Debug(mesg);
+	bzero(mesg, 255);
+	/* It doesn't exist, so add it to the end of the array. */
+	dwIndex = pAttrs->GetSize(pAttrs) - 1;
+	dwResult = pAttrs->InsertA
+}
+
+===========================================================================================================
+I have solved the problem!
+First, the documentation is incorrect on many issues.
+1) The Mandatory field must be set to 0, not 1.
+2) The size of the TLVValueLength field is 16 bits (2 bytes) not UCHAR
+(1 byte).
+3) The EAP-TLV Status message is in the Access-Request attributes [ie
+pECB->GetRequest(pECB)], not the response attributes [ie
+pECB->GetResponse(pECB, rcAccessChallenge)].
+4) To modify the success message in place, you should set
+pAttr->lpValue[5] = 1
+5) The lpValue attribute is a constant and you cannot do #4. You must
+create a non-const pointer to the lpValue to modify it: char* data =
+(char*)pAttr->lpValue; data[5] = 1
+6) The Reject-Reason code is not part of an Access-Reject packet. It is
+in the _request_ attributes inside the packet that contains the EAP-TLV
+Status message.
+
+Once those are straightened out, you can move forward. The next step is
+that, instead of creating a structure for the packet with a static
+length on the URL, you will need a dynamic length. So, just do this:
+
+pInRespAttrs = pECB->GetResponse(pECB, rcAccessChallenge);
+ucTLVValueLength = (UCHAR) strlen(url);
+euEAPTLV = RadiusAlloc(4 + ucTLVValueLength);
+ZeroMemory(euEAPTLV, 4+ucTLVValueLength);
+euEAPTLV[0] = 0;
+euEAPTLV[1] = 8;
+euEAPTLV[2] = 0;
+euEAPTLV[3] = ucTLVValueLength;
+strcpy(&euEAPTLV[4], url);
+
+/* Fill in the RADIUS_ATTRIBUTE struct. */
+raEAPTLV.dwAttrType = ratEAPTLV;
+raEAPTLV.fDataType = rdtString;
+raEAPTLV.cbDataLength = 4+ucTLVValueLength;
+raEAPTLV.lpValue = (PCSTR) euEAPTLV;
+
+/* Add as the ratPEAPTLV URI TLV. */
+dwIndex = pInRespAttrs->GetSize(pInRespAttrs) - 1;
+pInRespAttrs->InsertAt(pInRespAttrs, dwIndex, &raEAPTLV);

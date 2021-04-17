@@ -1,0 +1,12 @@
+; RadiusDB.def : Declares the module parameters.
+
+LIBRARY      "RadiusDB.DLL"
+
+EXPORTS
+        RadiusExtensionInit             @1
+        RadiusExtensionProcessEx        @2
+        RadiusExtensionFreeAttributes   @3
+        RadiusExtensionTerm             @4
+		RadiusDBTestAuthentication		@5
+
+

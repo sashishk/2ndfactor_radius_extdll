@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Schema name="RadiusDBSchema" xmlns="urn:schemas-microsoft-com:xml-data" xmlns:dt="urn:schemas-microsoft-com:datatypes">
+	<ElementType name="Attribute" model="closed" content="empty">
+		<AttributeType name="Number" dt:type="i4" required="yes"/>
+		<AttributeType name="Name" dt:type="string" required="yes"/>
+		<AttributeType name="Type" dt:type="enumeration" dt:values="Long IP String Binary" required="yes"/>
+		<attribute type="Number"/>
+		<attribute type="Name"/>
+		<attribute type="Type"/>
+	</ElementType>
+	<ElementType name="Attributes" model="closed" content="eltOnly" order="seq">
+		<element type="Attribute" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="Parameter" model="closed" content="empty">
+		<AttributeType name="Name" dt:type="enumeration" dt:values="NASIP clientIP password username" required="yes"/>
+		<AttributeType name="ADOType" dt:type="i2" required="yes"/>
+		<AttributeType name="ADOSize" dt:type="i4" required="yes"/>
+		<AttributeType name="Direction" dt:type="enumeration" dt:values="Input Output" required="yes"/>
+		<AttributeType name="RadiusAttribute" dt:type="string" required="no"/>
+		<attribute type="Name"/>
+		<attribute type="ADOType"/>
+		<attribute type="ADOSize"/>
+		<attribute type="Direction"/>
+		<attribute type="RadiusAttribute"/>
+	</ElementType>
+	<ElementType name="LoginRequest" model="closed" content="eltOnly" order="seq">
+		<AttributeType name="Name" dt:type="string" required="yes"/>
+		<attribute type="Name"/>
+		<AttributeType name="DSN" dt:type="string" required="yes"/>
+		<attribute type="DSN"/>
+		<element type="Parameter" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="AccountingRequest" model="closed" content="eltOnly" order="seq">
+		<AttributeType name="Name" dt:type="string" required="yes"/>
+		<attribute type="Name"/>
+		<AttributeType name="DSN" dt:type="string" required="yes"/>
+		<attribute type="DSN"/>
+		<element type="Parameter" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="PasswordRequest" model="closed" content="eltOnly" order="seq">
+		<AttributeType name="Name" dt:type="string" required="yes"/>
+		<attribute type="Name"/>
+		<AttributeType name="DSN" dt:type="string" required="yes"/>
+		<attribute type="DSN"/>
+		<element type="Parameter" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="RadiusConfig" model="closed" content="eltOnly" order="seq">
+		<AttributeType name="xmlns" dt:type="string"/>
+		<attribute type="xmlns"/>
+		<element type="Attributes" minOccurs="1" maxOccurs="1"/>
+		<element type="Schema" minOccurs="1" maxOccurs="1"/>
+	</ElementType>
+	<ElementType name="Schema" model="closed" content="eltOnly" order="seq">
+		<element type="PasswordRequest" minOccurs="1" maxOccurs="1"/>
+		<element type="LoginRequest" minOccurs="1" maxOccurs="1"/>
+	</ElementType>
+</Schema>

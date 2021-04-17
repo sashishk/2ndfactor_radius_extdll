@@ -1,0 +1,72 @@
+<RadiusConfig xmlns="x-schema:ConfigSchema.xdr">
+	<Attributes>
+		<Attribute Name="ratUserName" Number="1" Type="String"/>
+		<Attribute Name="ratUserPassword" Number="2" Type="String"/>
+		<Attribute Name="ratCHAPPassword" Number="3" Type="Binary"/>
+		<Attribute Name="ratNASIPAddress" Number="4" Type="IP"/>
+    <Attribute Name="ratNASPort" Number="5" Type="Long"/>
+    <Attribute Name="ratServiceType" Number="6" Type="Long"/>
+    <Attribute Name="ratFramedProtocol" Number="7" Type="Long"/>
+    <Attribute Name="ratFramedIPAddress" Number="8" Type="IP"/>
+    <Attribute Name="ratFramedIPNetmask" Number="9" Type="IP"/>
+    <Attribute Name="ratFramedRouting" Number="10" Type="Long"/>
+    <Attribute Name="ratFilterId" Number="11" Type="String"/>
+    <Attribute Name="ratFramedMTU" Number="12" Type="Long"/>
+    <Attribute Name="ratFramedCompression" Number="13" Type="IP"/>
+    <Attribute Name="ratLoginIPHost" Number="14" Type="IP"/>
+    <Attribute Name="ratLoginService" Number="15" Type="String"/>
+    <Attribute Name="ratLoginPort" Number="16" Type="Long"/>
+    <Attribute Name="ratReplyMessage" Number="18" Type="String"/>
+    <Attribute Name="ratCallbackNumber" Number="19" Type="String"/>
+    <Attribute Name="ratCallbackId" Number="20" Type="String"/>
+    <Attribute Name="ratFramedRoute" Number="22" Type="String"/>
+    <Attribute Name="ratFramedIPXNetwork" Number="23" Type="String"/>
+    <Attribute Name="ratState" Number="24" Type="Long"/>
+    <Attribute Name="ratClass" Number="25" Type="Long"/>
+    <Attribute Name="ratVendorSpecific" Number="26" Type="String"/>
+    <Attribute Name="ratSessionTimeout" Number="27" Type="Long"/>
+    <Attribute Name="ratIdleTimeout" Number="28" Type="Long"/>
+    <Attribute Name="ratTerminationAction" Number="29" Type="String"/>
+    <Attribute Name="ratCalledStationId" Number="30" Type="String"/>
+    <Attribute Name="ratCallingStationId" Number="31" Type="String"/>
+    <Attribute Name="ratNASIdentifier" Number="32" Type="String"/>
+    <Attribute Name="ratProxyState" Number="33" Type="Binary"/>
+    <Attribute Name="ratAcctStatusType" Number="40" Type="String"/>
+    <Attribute Name="ratAcctDelayTime" Number="41" Type="Long"/>
+    <Attribute Name="ratAcctInputOctets" Number="42" Type="Long"/>
+    <Attribute Name="ratAcctOutputOctets" Number="43" Type="Long"/>
+    <Attribute Name="ratAcctSessionId" Number="44" Type="String"/>
+    <Attribute Name="ratAcctAuthentic" Number="45" Type="String"/>
+    <Attribute Name="ratAcctSessionTime" Number="46" Type="Long"/>
+    <Attribute Name="ratAcctInputPackets" Number="47" Type="Long"/>
+    <Attribute Name="ratAcctOutputPackets" Number="48" Type="Long"/>
+    <Attribute Name="ratAcctTerminationCause" Number="49" Type="Long"/>
+    <Attribute Name="ratCHAPChallenge" Number="60" Type="String"/>
+    <Attribute Name="ratNASPortType" Number="61" Type="Long"/>
+    <Attribute Name="ratPortLimit" Number="62" Type="String"/>
+    <Attribute Name="ratAscendAssignIPPool" Number="218" Type="Long"/>
+    <Attribute Name="ratAscendDataFilter" Number="242" Type="String"/>
+    <Attribute Name="ratAscendIdleLimit" Number="244" Type="Long"/>
+    <Attribute Name="ratCode" Number="262" Type="Long"/>
+    <Attribute Name="ratIdentifier" Number="263" Type="Long"/>
+    <Attribute Name="ratAuthenticator" Number="264" Type="Binary"/>
+    <Attribute Name="ratSrcIPAddress" Number="265" Type="IP"/>
+    <Attribute Name="ratSrcPort" Number="266" Type="Long"/>
+    <Attribute Name="ratProvider" Number="267" Type="Long"/>
+    <Attribute Name="ratStrippedUserName" Number="268" Type="String"/>
+    <Attribute Name="ratFQUserName" Number="269" Type="String"/>
+    <Attribute Name="ratPolicyName" Number="270" Type="String"/>
+	</Attributes>
+	<Schema>
+		<PasswordRequest Name="ppc_password_request" DSN="RadiusServer">
+			<Parameter Name="username" ADOType="200" ADOSize="128" Direction="Input" RadiusAttribute="ratUserName"/>
+			<Parameter Name="NASIP" ADOType="200" ADOSize="32" Direction="Input" RadiusAttribute="ratNASIPAddress"/>
+			<Parameter Name="password" ADOType="200" ADOSize="128" Direction="Output" RadiusAttribute="ratUserPassword"/>
+		</PasswordRequest>
+		<LoginRequest Name="ppc_login_request" DSN="RadiusServer">
+			<Parameter Name="username" ADOType="200" ADOSize="128" Direction="Input" RadiusAttribute="ratUserName"/>
+			<Parameter Name="clientIP" ADOType="200" ADOSize="16" Direction="Input" RadiusAttribute="ratNASIPAddress"/>
+			<Parameter Name="password" ADOType="200" ADOSize="128" Direction="Output" RadiusAttribute="ratUserPassword"/>
+		</LoginRequest>
+	</Schema>
+</RadiusConfig>

@@ -1,0 +1,7 @@
+REGEDIT4
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\RadiusDB]
+"EventMessageFile"="C:\\DEV\\RADIUSDB\\DEBUG\\RadiusDB.dll"
+"CategoryMessageFile"="C:\\DEV\\RADIUSDB\\DEBUG\\RadiusDB.dll"
+"TypesSupported"=dword:00000007
+"CategoryCount"=dword:00000001
